@@ -1,0 +1,66 @@
+managed;
+strict;
+with draft;
+
+define behavior for ZRAP100_R_TravelTP_264 alias Travel
+implementation in class ZRAP100_BP_TravelTP_264 unique
+persistent table zrap100_atrav264
+draft table zrap100_dtrav264
+etag master LastChangedAt
+lock master total etag LocalLastChangedAt
+authorization master ( global )
+early numbering
+{
+  field ( readonly )
+  TravelID,
+  CreatedBy,
+  CreatedAt,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+
+  create;
+  update ( features : instance );
+  delete ( features : instance );
+
+  action ( features : instance ) acceptTravel result [1] $self;
+  action ( features : instance ) rejectTravel result [1] $self;
+  action ( features : instance ) deductDiscount parameter /dmo/a_travel_discount result [1] $self;
+
+  factory action copyTravel [1];
+
+  determination setStatusToOpen on modify { create; }
+
+  validation validateCustomer on save { create; field CustomerID; }
+  validation validateDates on save { create; field BeginDate, EndDate; }
+
+  draft determine action Prepare
+  {
+    validation validateCustomer;
+    validation validateDates;
+  }
+
+  draft action ( features : instance ) Edit;
+  draft action Activate;
+  draft action Discard;
+  draft action Resume;
+
+  mapping for ZRAP100_ATRAV264
+  {
+    TravelID = TRAVEL_ID;
+    AgencyID = AGENCY_ID;
+    CustomerID = CUSTOMER_ID;
+    BeginDate = BEGIN_DATE;
+    EndDate = END_DATE;
+    BookingFee = BOOKING_FEE;
+    TotalPrice = TOTAL_PRICE;
+    CurrencyCode = CURRENCY_CODE;
+    Description = DESCRIPTION;
+    OverallStatus = OVERALL_STATUS;
+    CreatedBy = CREATED_BY;
+    CreatedAt = CREATED_AT;
+    LastChangedBy = LAST_CHANGED_BY;
+    LastChangedAt = LAST_CHANGED_AT;
+    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+  }
+}
